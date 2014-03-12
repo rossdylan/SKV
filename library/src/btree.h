@@ -39,6 +39,6 @@ Split_t* BTreeNode_split(BTreeNode* node);
 BTreeNode* BTreeNode_findRoot(BTreeNode* node);
 BTreeNode* BTreeNode_promote(BTreeNode* node);
 BTreeNode* BTreeNode_insert(BTreeNode* root, const char* key, void* data);
-BTreeNode* BTreeNode_delete(BTreeNode* node);
+BTreeNode* BTreeNode_delete(BTreeNode* node, const char* key);
 
 #endif

@@ -204,7 +204,11 @@ BTreeNode* BTreeNode_insert(BTreeNode* root, const char* key, void* data) {
 	return root;
 }
 
-//BTreeNode* BTreeNode_delete()
+BTreeNode* BTreeNode_delete(BTreeNode* root, const char* key) {
+	// Not Implemented yet
+	return root;
+
+}
 
 /*
 int main(int argc, char* argv[]) {
