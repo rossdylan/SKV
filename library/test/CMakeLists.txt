@@ -1,4 +1,4 @@
-set( TEST_EXECUTABLES test_mem_btree )
+set( TEST_EXECUTABLES test_mem_btree test_disk_tree)
 
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_OUTPUT_DIRECTORY}/tests )
 find_package(Check REQUIRED)
@@ -11,6 +11,7 @@ include_directories(
 
 set( SOURCES
     ${CMAKE_SOURCE_DIR}/library/src/btree.c
+    ${CMAKE_SOURCE_DIR}/library/src/disktree.c
 )
 
 set( LIBS ${LIBS} ${CHECK_LIBRARIES} )
