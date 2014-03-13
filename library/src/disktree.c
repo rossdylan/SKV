@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <sys/mman.h>
 #include <string.h>
-#include <math.h>
+#include <limits.h>
 
 
 blksize_t SectorSize(const char* path) {
@@ -43,9 +43,20 @@ int NextPageNum(const char* rootPath) {
     return last_page + 1;
 }
 
+
+int numPlaces(int n) {
+	int r = 1;
+	if (n < 0) n = (n == INT_MIN) ? INT_MAX : -n;
+	while (n > 9) {
+		n /= 10;
+		r++;
+	}
+	return r;
+}
+
 char* newPageFileString(const char* root, int num) {
-    char* pnum = malloc((int)((ceil(log10(num))+1)*sizeof(char)));
-    sprintf(pnum, "%d", num);
+    char* pnum = malloc((numPlaces(num) + 1)*sizeof(char));
+	sprintf(pnum, "%d", num);
     char* path = malloc(strlen(pnum) + strlen(root) + strlen("/.data") + 1);
     strcat(path, root);
     strcat(path, "/");
@@ -61,7 +72,7 @@ PageRef* NewDataPage(const char* rootPath) {
 	size_t ssize;
 	ssize = SectorSize("./");
     char* pagePath = newPageFileString(rootPath, pageNumber);
-	if((fd = open("./1.data", O_CREAT|O_RDWR)) == -1) {
+	if((fd = open(pagePath, O_CREAT|O_RDWR)) == -1) {
 		perror("open");
 		exit(1);
 	};

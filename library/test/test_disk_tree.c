@@ -2,11 +2,12 @@
 #include <string.h>
 #include <check.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 START_TEST(test_new_page_path)
 {
     char* expectedPath = "./1.data";
-    char* thePath = newPageFileString("./", 1);
+    char* thePath = newPageFileString(".", 1);
     ck_assert_str_eq(thePath, expectedPath);
     free(thePath);
 }
