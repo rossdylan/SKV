@@ -6,12 +6,16 @@
 
 START_TEST(test_new_page_path)
 {
-    char* expectedPath = "./1.data";
-    char* thePath = newPageFileString(".", 1);
-    ck_assert_str_eq(thePath, expectedPath);
-    free(thePath);
+	PageManager* pm = new_page_manager(".");
+	char* expected_path = malloc(strlen("./1.dat")+1);
+	memset(expected_path, 0, strlen("./1.dat")+1);
+	sprintf(expected_path, "./1.dat");
+	char* the_path = new_page_file_string(pm, 1);
+	ck_assert_str_eq(the_path, expected_path);
+	free(the_path);
 }
 END_TEST
+
 
 Suite* disktree_suite(void) {
 	Suite* suite = suite_create("Disktrees");

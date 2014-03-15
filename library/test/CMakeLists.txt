@@ -1,4 +1,4 @@
-set( TEST_EXECUTABLES test_mem_btree test_disk_tree)
+set( TEST_EXECUTABLES test_mem_btree test_disk_tree test_thing_derp)
 
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_OUTPUT_DIRECTORY}/tests )
 find_package(Check REQUIRED)

@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 2.6)
 project (skv)
 
-
+set( CMAKE_C_FLAGS "-g" )
 # Shit stolen from worr
 set( APPLICATION_VERSION_MAJOR "1" )
 set( APPLICATION_VERSION_MINOR "0" )
