@@ -1,5 +1,5 @@
-#ifndef __BTREE_H
-#define __BTREE_H
+#ifndef _SKV_BTREE_H_
+#define _SKV_BTREE_H_
 
 #include <stdbool.h>
 typedef struct {

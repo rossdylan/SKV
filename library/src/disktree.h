@@ -1,5 +1,5 @@
-#ifndef __DISKTREE_H
-#define __DISKTREE_H
+#ifndef _SKV_DISKTREE_H_
+#define _SKV_DISKTREE_H_
 
 #define TREEPAGE_HEADER 0xDE110
 #define DATAPAGE_HEADER 0xDE111
@@ -56,19 +56,25 @@ typedef struct {
     int datapage_num; // number fo data pages
 } IndexPage;
 
-
-void fill_file(int fd, uint8_t b, size_t len);
-RawPage* load_page(char* path, int size);
-void unload_page(RawPage* page);
-PageMeta* load_page_meta(RawPage* page);
-PageRef* add_data_to_page(RawPage* page, uint8_t* data, int size);
-void remove_data_from_page(RawPage* page, PageRef* ref);
-RawPage* new_data_page(PageManager* pm);
+// PageManagers
 PageManager* new_page_manager(char* root_path);
 void delete_page_manager(PageManager* pm);
+
+// raw pages
+RawPage* load_page(char* path, int size);
+void unload_page(RawPage* page);
+RawPage* new_data_page(PageManager* pm);
+PageMeta* load_page_meta(RawPage* page);
+
+// data page
+PageRef* add_data_to_page(RawPage* page, uint8_t* data, int size);
+uint8_t* load_data_from_page(RawPage* page, PageRef* ref);
+void remove_data_from_page(RawPage* page, PageRef* ref);
 int next_data_page_num(PageManager* pm);
 void increment_data_page_num(PageManager* pm);
+
+//Utility functions
 int num_places(int n);
+void fill_file(int fd, uint8_t b, size_t len);
 char* new_page_file_string(PageManager* pm, int num);
-uint8_t* load_data_from_page(RawPage* page, PageRef* ref);
 #endif
