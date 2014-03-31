@@ -93,19 +93,96 @@ void remove_data_from_page(RawPage* page, PageRef* ref) {
 	// Need to think about this
 	// Removing data from a page is going to cause fragmentation
 	// Might need to keep a map of freespace
+	// more thinking has yielded the idea of periodic compaction/defrag runs
+	// do it once on startup and then after some N number of deletions
 	return;
 }
 
-RawPage* new_data_page(PageManager* pm) {
-	int next_page_num = next_data_page_num(pm);
-	increment_data_page_num(pm);
-	char* next_page_str = new_page_file_string(pm, next_page_num);
+RawPage* new_raw_page(PageManager* pm) {
+	int next_page = next_page_num(pm);
+	increment_page_num(pm);
+	char* next_page_str = new_page_file_string(pm, next_page);
 	RawPage* next = load_page(next_page_str, sysconf(_SC_PAGE_SIZE));
 	PageMeta* meta = load_page_meta(next);
-	meta->page_type = DATAPAGE_HEADER;
-	meta->last_offset = (uint64_t)sizeof(PageMeta);
-	meta->page_num = next_page_num;
+	meta->last_offset = (uint64_t)sizeof(PageMeta) + 1;
+	meta->page_num = next_page;
 	return next;
+}
+
+PageRef* add_tree_to_page(RawPage* page, TreeNode* node) {
+	PageMeta* meta = load_page_meta(page);
+	int last_offset = meta->last_offset;
+	// First we need to setup our header
+	TreeHeader* header = (TreeHeader* )page->page+last_offset;
+	header->size = node->size;
+	header->order = node->order;
+	header->parent = node->parent;
+	header->num_leaves = node->num_leaves;
+	uint64_t end_of_header = (uint64_t)page->page+last_offset+sizeof(TreeHeader)+1;
+	// now we need to iterate through our leaf references and store them
+	for(int i=0; i<node->num_leaves;i++) {
+		PageRef* leaf = (PageRef* )(i * sizeof(PageRef) + end_of_header);
+		memcpy(leaf, node->leaves+(i * sizeof(PageRef)), sizeof(PageRef));
+	}
+	uint64_t end_of_leaves = end_of_header + (sizeof(PageRef) * node->num_leaves) + 1;
+	uint64_t latest_offset = end_of_leaves;
+	for(int i=0; i<node->size;i++) {
+		KeyHeader* kdp = (KeyHeader* )latest_offset;
+		kdp->key_size = node->keys[i].key_size;
+		kdp->data = node->keys[i].data;
+		latest_offset += sizeof(KeyHeader) + 1;
+		char* key_ptr = (char* )latest_offset;
+		uint64_t key_size = sizeof(char) * node->keys[i].key_size;
+		memcpy(key_ptr, node->keys + (sizeof(char) * i), key_size);
+		latest_offset += key_size + 1;
+	}
+	PageRef* result = malloc(sizeof(PageRef));
+	result->page_type = TREEPAGE_HEADER;
+	result->page_num = meta->page_num;
+	result->node_offset = last_offset;
+	meta->last_offset = latest_offset + 1;
+	return result;
+}
+
+TreeNode* load_tree_node(RawPage* page, PageRef* loc) {
+	TreeHeader* header = (TreeHeader* )page->page + loc->node_offset;
+	TreeNode* node = malloc(sizeof(TreeNode));
+	node->size = header->size;
+	node->order = header->order;
+	node->parent = header->parent;
+	node->num_leaves = header->num_leaves;
+	node->leaves = malloc(sizeof(PageRef) * node->order+1);
+	node->keys = malloc(sizeof(KDP) * node->order+1);
+	uint64_t leaves_start = sizeof(TreeHeader) + loc->node_offset + 1;
+	for(int i=0;i<node->num_leaves;i++) {
+		memcpy(node->leaves+(i * sizeof(PageRef)), page->page + leaves_start + i*(sizeof(PageRef)), sizeof(PageRef));
+	}
+	uint64_t keys_start = leaves_start + node->num_leaves * sizeof(PageRef) + 1;
+	uint64_t key_offsets = 0;
+	for(int i=0;i<node->size;i++) {
+		KeyHeader* kheader = (KeyHeader* )(page->page + keys_start + (sizeof(KeyHeader) * i) + key_offsets);
+		memcpy(&node->keys[i].data, &kheader->data, sizeof(PageRef));
+		node->keys[i].key_size = kheader->key_size;
+		node->keys[i].key = malloc(sizeof(char) * kheader->key_size);
+		char* ondisk_key = (char* )(page->page + keys_start + (sizeof(KeyHeader) * i+1) + key_offsets);
+		strcpy(node->keys[i].key, ondisk_key);
+		key_offsets += kheader->key_size * sizeof(char);
+	}
+	return node;
+}
+
+RawPage* new_tree_page(PageManager* pm) {
+	RawPage* raw = new_raw_page(pm);
+	PageMeta* meta = load_page_meta(raw);
+	meta->page_type = TREEPAGE_HEADER;
+	return raw;
+}
+
+RawPage* new_data_page(PageManager* pm) {
+	RawPage* raw = new_raw_page(pm);
+	PageMeta* meta = load_page_meta(raw);
+	meta->page_type = DATAPAGE_HEADER;
+	return raw;
 }
 
 /* Create a new page manager based out of the gien root path */
@@ -144,22 +221,21 @@ IndexPage* load_index(RawPage* page) {
 }
 
 /* Return the number of the next unallocated page */
-int next_data_page_num(PageManager* pm) {
+int next_page_num(PageManager* pm) {
 	RawPage* raw_index = load_page(pm->index_path, sysconf(_SC_PAGE_SIZE));
 	IndexPage* index = load_index(raw_index);
 	if(raw_index->empty) {
-		index->treepage_num = 0;
-		index->datapage_num = 0;
+		index->page_num = 0;
 	}
-	int next = index->datapage_num;
+	int next = index->page_num;
 	unload_page(raw_index);
 	return next;
 }
 
-void increment_data_page_num(PageManager* pm) {
+void increment_page_num(PageManager* pm) {
 	RawPage* raw_index = load_page(pm->index_path, sysconf(_SC_PAGE_SIZE));
 	IndexPage* index = load_index(raw_index);
-	index->datapage_num += 1;
+	index->page_num += 1;
 	unload_page(raw_index);
 }
 
