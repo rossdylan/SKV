@@ -11,6 +11,7 @@ typedef struct {
 struct _BTreeNode {
 	int order;
 	int size;
+    bool leaf; // is this node a leaf
 	KDP* keys;
 	struct _BTreeNode** leaves;
 	struct _BTreeNode* parent;
@@ -40,5 +41,6 @@ BTreeNode* BTreeNode_findRoot(BTreeNode* node);
 BTreeNode* BTreeNode_promote(BTreeNode* node);
 BTreeNode* BTreeNode_insert(BTreeNode* root, const char* key, void* data);
 BTreeNode* BTreeNode_delete(BTreeNode* node, const char* key);
+void BTreeNode_fillGaps(BTreeNode* node, int index);
 
 #endif

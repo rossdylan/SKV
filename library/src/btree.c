@@ -16,6 +16,7 @@ BTreeNode* NewBTreeNode(int order) {
 	BTreeNode* newNode = malloc(sizeof(BTreeNode));
 	newNode->order = order;
 	newNode->size = 0;
+	newNode->leaf = true;
 
 	newNode->keys = malloc(sizeof(KDP)*(order+1));
 	memset(newNode->keys, 0, sizeof(KDP)*(order+1));
@@ -170,6 +171,7 @@ BTreeNode* BTreeNode_promote(BTreeNode* node) {
 		parent->leaves[index]->parent = parent;
 		parent->leaves[index+1] = splitup->right;
 		parent->leaves[index+1]->parent = parent;
+		parent->leaf = false;
 		free(splitup);
 		if(parent->size <= parent->order) {
 			break;
@@ -192,7 +194,9 @@ BTreeNode* BTreeNode_insert(BTreeNode* root, const char* key, void* data) {
 		if(next == last) {
 			BTreeNode_addKey(next, *newKDP);
 			free(newKDP);
-			if(next->size <= next->order) {
+			// max size for a node is 2n - 1
+			// min size for a node is n-1
+			if(next->size <= (2 * next->order) - 1) {
 				return root;
 			}
 			else {
@@ -204,10 +208,57 @@ BTreeNode* BTreeNode_insert(BTreeNode* root, const char* key, void* data) {
 	return root;
 }
 
-BTreeNode* BTreeNode_delete(BTreeNode* root, const char* key) {
-	// Not Implemented yet
-	return root;
 
+//find where the node is and memset it to 0
+// we will fill in the gap later if we need to
+int BTreeNode_removeData(BTreeNode* node, const char* key) {
+	int cmp;
+	int index = -1;
+	for(int i=0; i < node->size; i++) {
+		cmp = strcmp(key, node->keys[i].Key);
+		if(cmp == 0) {
+			index = i;
+			break;
+		}
+	}
+	if(index >= 0) {
+		memset(node->keys+(index * sizeof(KDP)), 0, sizeof(KDP));
+		node->size--;
+	}
+	return index;
+}
+
+void BTreeNode_fillGaps(BTreeNode* node, int index) {
+	for(int i=index+1;i<node->size+1;i++) {
+		node->keys[i-1] = node->keys[i];
+	}
+}
+
+BTreeNode* BTreeNode_delete(BTreeNode* root, const char* key) {
+	BTreeNode* last = root;
+	BTreeNode* next;
+	while(true) {
+		next = BTreeNode_descend(root, key);
+		// this node is either the node where our key is, or there is no key
+		if(next == last) {
+			int removedIndex = BTreeNode_removeData(next, key);
+			if(next->leaf) {
+				// we just delete since this is a leaf node
+				BTreeNode_fillGaps(next, removedIndex);
+				return root;
+			}
+			else {
+				//well we need to do a lot of work now
+				if(next->size < next->order-1) {
+
+				}
+				else {
+					// we can pull a kdp from a node below us
+					return root;
+				}
+			}
+		}
+	}
 }
 
 /*
