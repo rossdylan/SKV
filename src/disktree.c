@@ -7,8 +7,8 @@
 #include <stdbool.h>
 
 #include <SKV/llist.h>
-#include <SKV/disktree.h>
 #include <SKV/pagemanager.h>
+#include <SKV/disktree.h>
 
 PageRef* add_data_to_page(RawPage* page, uint8_t* data, int size) {
 	PageMeta* meta = load_page_meta(page);

@@ -1,7 +1,6 @@
 #ifndef _SKV_BTREE_H_
 #define _SKV_BTREE_H_
 
-#include <stdbool.h>
 typedef struct {
 	const char* Key;
 	void* Data;

@@ -4,11 +4,6 @@
 #define TREEPAGE_HEADER 0xDE110
 #define DATAPAGE_HEADER 0xDE111
 
-#include "pagemanager.h"
-#include <sys/types.h>
-#include <stdint.h>
-#include <stdbool.h>
-
 typedef struct {
     uint64_t key_size;
     PageRef data;
