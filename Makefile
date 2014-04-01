@@ -37,7 +37,12 @@ llist.o: src/llist.c
 pagemanager.o: src/pagemanager.c
 	$(CC) -c $(CFLAGS) $(INCLUDE) $(FPIC) src/pagemanager.c
 
+.PHONY: test
+test: libskv.a
+	make -C test
+
 .PHONY: clean
 clean:
 	rm -f libskv.a
 	rm -f *.o
+	make -C test clean
