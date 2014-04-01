@@ -2,32 +2,34 @@
 #include <check.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 
-#include <SKV/disktree.h>
+#include <SKV/llist.h>
 #include <SKV/pagemanager.h>
+#include <SKV/disktree.h>
 
 PageRef* save_string(RawPage* page, char* str) {
 	PageRef* ref = add_data_to_page(page, (unsigned char* )str, strlen(str)+1);
-	printf("I stored a string at: %d-%d\n", ref->page_num, ref->node_offset);
+	printf("I stored a string at: %lu-%d\n", ref->page_num, ref->node_offset);
 	return ref;
 }
 
 char* load_string(PageManager* pm, PageRef* ref) {
 	char* gen_data = (char* )load_data_from_page(pm, ref);
-	printf("I loaded '%s', from %d-%d\n", gen_data, ref->page_num, ref->node_offset);
+	printf("I loaded '%s', from %lu-%d\n", gen_data, ref->page_num, ref->node_offset);
 	return gen_data;
 }
 
 PageRef* save_node(RawPage* page, TreeNode* node) {
 	PageRef* ref = add_tree_to_page(page, node);
-	printf("I stored a node at: %d-%d\n", ref->page_num, ref->node_offset);
+	printf("I stored a node at: %lu-%d\n", ref->page_num, ref->node_offset);
 	return ref;
 }
 
 
 TreeNode* load_node(PageManager* pm, PageRef* ref) {
 	TreeNode* node = load_tree_node(pm, ref);
-	printf("I loaded a node with ['size': %d, 'order': %d, 'num_leaves': %d, 'parent': ['page': %d, 'offset': %d]]", node->size, node->order, node->num_leaves, node->parent.page_num, node->parent.node_offset);
+	printf("I loaded a node with ['size': %d, 'order': %d, 'num_leaves': %d, 'parent': ['page': %lu, 'offset': %d]]", node->size, node->order, node->num_leaves, node->parent.page_num, node->parent.node_offset);
 	return node;
 }
 

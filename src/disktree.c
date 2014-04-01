@@ -100,7 +100,7 @@ TreeNode* load_tree_node(PageManager* pm, PageRef* loc) {
 		strcpy(node->keys[i].key, ondisk_key);
 		key_offsets += kheader->key_size * sizeof(char);
 	}
-	release_ref(pm, loc);
+//	release_ref(pm, loc);
 	return node;
 }
 

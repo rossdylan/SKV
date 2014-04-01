@@ -1,6 +1,7 @@
 #include <string.h>
 #include <check.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include <SKV/btree.h>
 

@@ -2,7 +2,9 @@
 #include <check.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 
+#include <SKV/llist.h>
 #include <SKV/pagemanager.h>
 #include <SKV/disktree.h>
 
