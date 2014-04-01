@@ -1,3 +1,4 @@
+#include "pagemanager.h"
 #include "disktree.h"
 #include <string.h>
 #include <check.h>

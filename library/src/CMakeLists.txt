@@ -1,4 +1,4 @@
-add_library(skv SHARED btree.c disktree.c)
+add_library(skv SHARED btree.c disktree.c pagemanager.c llist.c)
 install( TARGETS skv LIBRARY DESTINATION ${libdir} )
 file( GLOB files "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
 install( FILES ${files} DESTINATION include/libskv)

@@ -1,4 +1,5 @@
 #include "disktree.h"
+#include "pagemanager.h"
 #include <string.h>
 #include <check.h>
 #include <stdlib.h>
@@ -10,8 +11,8 @@ PageRef* save_string(RawPage* page, char* str) {
 	return ref;
 }
 
-char* load_string(RawPage* page, PageRef* ref) {
-	char* gen_data = (char* )load_data_from_page(page, ref);
+char* load_string(PageManager* pm, PageRef* ref) {
+	char* gen_data = (char* )load_data_from_page(pm, ref);
 	printf("I loaded '%s', from %d-%d\n", gen_data, ref->page_num, ref->node_offset);
 	return gen_data;
 }
@@ -23,8 +24,8 @@ PageRef* save_node(RawPage* page, TreeNode* node) {
 }
 
 
-TreeNode* load_node(RawPage* page, PageRef* ref) {
-	TreeNode* node = load_tree_node(page, ref);
+TreeNode* load_node(PageManager* pm, PageRef* ref) {
+	TreeNode* node = load_tree_node(pm, ref);
 	printf("I loaded a node with ['size': %d, 'order': %d, 'num_leaves': %d, 'parent': ['page': %d, 'offset': %d]]", node->size, node->order, node->num_leaves, node->parent.page_num, node->parent.node_offset);
 	return node;
 }
@@ -38,9 +39,12 @@ int main (void) {
 	// Save some strings
 	PageRef* str_1 = save_string(new_page, "Hello There");
 	PageRef* str_2 = save_string(new_page, "I am a second string");
+	printf("Before unload page\n");
+	unload_page(new_page);
+	printf("After unloda page\n");
 	// load some strings
-	load_string(new_page, str_1);
-	load_string(new_page, str_2);
+	load_string(pm, str_1);
+	load_string(pm, str_2);
 
 	//make our tree page
 	RawPage* t_page = new_tree_page(pm);
@@ -53,6 +57,7 @@ int main (void) {
 	test_node->parent.page_num = 31337;
 	test_node->parent.node_offset = 31337;
 	PageRef* node1 = save_node(t_page, test_node);
-	load_node(t_page, node1);
+	unload_page(t_page);
+	load_node(pm, node1);
 
 }

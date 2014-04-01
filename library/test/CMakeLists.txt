@@ -12,6 +12,8 @@ include_directories(
 set( SOURCES
     ${CMAKE_SOURCE_DIR}/library/src/btree.c
     ${CMAKE_SOURCE_DIR}/library/src/disktree.c
+    ${CMAKE_SOURCE_DIR}/library/src/pagemanager.c
+    ${CMAKE_SOURCE_DIR}/library/src/llist.c
 )
 
 set( LIBS ${LIBS} ${CHECK_LIBRARIES} )
