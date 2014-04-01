@@ -1,6 +1,6 @@
-#include "llist.h"
-#include "string.h"
+#include <string.h>
 
+#include <SKV/llist.h>
 
 void new_list_node(Node* n, void* data) {
 	memset(n, 0, sizeof(Node));

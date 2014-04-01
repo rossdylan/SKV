@@ -1,9 +1,10 @@
-#include "disktree.h"
-#include "pagemanager.h"
 #include <string.h>
 #include <check.h>
 #include <stdlib.h>
 #include <stdio.h>
+
+#include <SKV/disktree.h>
+#include <SKV/pagemanager.h>
 
 PageRef* save_string(RawPage* page, char* str) {
 	PageRef* ref = add_data_to_page(page, (unsigned char* )str, strlen(str)+1);

@@ -1,9 +1,10 @@
-#include "pagemanager.h"
-#include "disktree.h"
 #include <string.h>
 #include <check.h>
 #include <stdlib.h>
 #include <stdio.h>
+
+#include <SKV/pagemanager.h>
+#include <SKV/disktree.h>
 
 START_TEST(test_new_page_path)
 {

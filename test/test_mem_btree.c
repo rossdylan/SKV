@@ -1,8 +1,8 @@
-#include "btree.h"
 #include <string.h>
 #include <check.h>
 #include <stdlib.h>
 
+#include <SKV/btree.h>
 
 START_TEST (test_single_insert)
 {
