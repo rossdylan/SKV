@@ -11,8 +11,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include <SKV/pagemanager.h>
 #include <SKV/llist.h>
+#include <SKV/pagemanager.h>
 
 /*
  * Utilities
@@ -229,7 +229,7 @@ RawPage* acquire_ref(PageManager* pm, PageRef* ref) {
 
 }
 
-void release_ref(PageManager* pm, PageRef* ref) {
+//void release_ref(PageManager* pm, PageRef* ref) {
 	// This function will do more once locking is added in.
-	return;
-}
+//	return;
+//}

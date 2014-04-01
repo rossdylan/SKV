@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include <SKV/llist.h>
 #include <SKV/disktree.h>
 #include <SKV/pagemanager.h>
 
@@ -25,19 +26,18 @@ PageRef* add_data_to_page(RawPage* page, uint8_t* data, int size) {
 
 uint8_t* load_data_from_page(PageManager* pm, PageRef* ref) {
 	RawPage* page = acquire_ref(pm, ref);
-	DataHeader* header = (DataHeader* )page->page+ref->node_offset;
 	uint8_t* data = (uint8_t* )page->page+ref->node_offset+sizeof(DataHeader);
 	return data;
 }
 
-void remove_data_from_page(RawPage* page, PageRef* ref) {
+//void remove_data_from_page(RawPage* page, PageRef* ref) {
 	// Need to think about this
 	// Removing data from a page is going to cause fragmentation
 	// Might need to keep a map of freespace
 	// more thinking has yielded the idea of periodic compaction/defrag runs
 	// do it once on startup and then after some N number of deletions
-	return;
-}
+//	return;
+//}
 
 
 PageRef* add_tree_to_page(RawPage* page, TreeNode* node) {

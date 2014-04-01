@@ -1,11 +1,6 @@
 #ifndef _SKV_PAGEMANAGER_H_
 #define _SKV_PAGEMANAGER_H_
 
-#include <sys/types.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include "llist.h"
-
 /**
  * A PageRef is a reference to a location in a page. It specifies the page
  * number and the offset which is used to mmap data from that page.
@@ -14,7 +9,7 @@
  */
 typedef struct {
     int page_type;
-    int page_num; //the page to load
+    uint64_t page_num; //the page to load
     int node_offset; //the offset in the page to load
 } PageRef;
 
