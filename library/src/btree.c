@@ -4,7 +4,7 @@
 #include <string.h>
 #include <stdio.h>
 
-
+// Create and fill a new KDP struct
 KDP* NewKDP(const char* key, void* data) {
 	KDP* newKDP = malloc(sizeof(KDP));
 	newKDP->Key = key;
@@ -12,6 +12,7 @@ KDP* NewKDP(const char* key, void* data) {
 	return newKDP;
 }
 
+// Create a new tree node struct and fill it with default values
 BTreeNode* NewBTreeNode(int order) {
 	BTreeNode* newNode = malloc(sizeof(BTreeNode));
 	newNode->order = order;
@@ -28,12 +29,14 @@ BTreeNode* NewBTreeNode(int order) {
 	return newNode;
 }
 
+// free a single btree nodes memory
 void BTreeNode_free(BTreeNode* node) {
 	free(node->keys);
 	free(node->leaves);
 	free(node);
 }
 
+// recursively free all nodes below and including the given node
 void BTreeNode_freeRecursive(BTreeNode* node) {
 	if(node == NULL) {
 		return;
@@ -53,10 +56,12 @@ void BTreeNode_freeRecursive(BTreeNode* node) {
 	}
 }
 
+// check if a btree node is empty
 bool BTreeNode_isEmpty(BTreeNode* node) {
 	return node->size == 0;
 }
 
+// print out the metadata stored in a btree node
 void BTreeNode_print(BTreeNode* node) {
 	printf("Size: %d\n", node->size);
 	printf("Order: %d\n", node->order);
@@ -70,6 +75,8 @@ void BTreeNode_print(BTreeNode* node) {
 	}
 }
 
+// find the next closest node to the node containing the give key
+// if the key is not in our tree, or we found it return the same node
 BTreeNode* BTreeNode_descend(BTreeNode* root, const char* key) {
 	if(BTreeNode_isEmpty(root)) {
 		return root;
@@ -92,6 +99,8 @@ BTreeNode* BTreeNode_descend(BTreeNode* root, const char* key) {
 	return farNode;
 }
 
+// get the data stored in a node with the given key
+// or return null if it doesn't exist
 void* BTreeNode_getData(BTreeNode* node, const char* key) {
 	int cmp;
 	for(int i = 0; i< node->size; i++) {
@@ -103,12 +112,14 @@ void* BTreeNode_getData(BTreeNode* node, const char* key) {
 	return NULL;
 }
 
+// add a new kdp to the given node
 int BTreeNode_addKey(BTreeNode* node, KDP kdp) {
 	node->keys[node->size] = kdp;
 	node->size++;
 	return node->size-1;
 }
 
+// return the value paired with the given key by searching through the tree
 void* BTreeNode_search(BTreeNode* node, const char* key) {
 	BTreeNode* last = node;
 	BTreeNode* next;
@@ -126,6 +137,8 @@ void* BTreeNode_search(BTreeNode* node, const char* key) {
 	}
 }
 
+// used in the btree promotion logic
+// take a single node and split it into two nodes each containing half the original nodes KDPs
 Split_t* BTreeNode_split(BTreeNode* node) {
 	Split_t* split = malloc(sizeof(Split_t));
 	int middleIndex = node->size / 2;
@@ -145,7 +158,7 @@ Split_t* BTreeNode_split(BTreeNode* node) {
 	return split;
 }
 
-
+// climb up the tree until we find the root node
 BTreeNode* BTreeNode_findRoot(BTreeNode* node) {
 	BTreeNode* current = node;
 	while(true) {
@@ -157,6 +170,9 @@ BTreeNode* BTreeNode_findRoot(BTreeNode* node) {
 	}
 }
 
+// when we fill up a node we need to rebalance the tree via promotion
+// we split the overflown node and add the resulting two nodes to the parent node
+// if this operation overflows that parent node we run promote again
 BTreeNode* BTreeNode_promote(BTreeNode* node) {
 	BTreeNode* parent = node->parent;
 	BTreeNode* current = node;
@@ -185,6 +201,8 @@ BTreeNode* BTreeNode_promote(BTreeNode* node) {
 	return BTreeNode_findRoot(parent);
 }
 
+// climb down the tree and find the right place to put a new KDP
+// if we overflow a node's storage we run the promote function
 BTreeNode* BTreeNode_insert(BTreeNode* root, const char* key, void* data) {
 	KDP* newKDP = NewKDP(key, data);
 	BTreeNode* last = root;
@@ -228,12 +246,16 @@ int BTreeNode_removeData(BTreeNode* node, const char* key) {
 	return index;
 }
 
+// fill in the gaps in a nodes key array
+// used to compact things after a delete operation
 void BTreeNode_fillGaps(BTreeNode* node, int index) {
 	for(int i=index+1;i<node->size+1;i++) {
 		node->keys[i-1] = node->keys[i];
 	}
 }
 
+//delete a node from the tree
+// this is super complicated due to all the self balancing edge cases
 BTreeNode* BTreeNode_delete(BTreeNode* root, const char* key) {
 	BTreeNode* last = root;
 	BTreeNode* next;
