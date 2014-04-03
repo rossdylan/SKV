@@ -108,6 +108,7 @@ RawPage* new_raw_page(PageManager* pm) {
 	return next;
 }
 
+// load the metadata of a page
 PageMeta* load_page_meta(RawPage* page) {
 	return (PageMeta* )page->page;
 }
@@ -116,6 +117,7 @@ PageMeta* load_page_meta(RawPage* page) {
  * Index management
  */
 
+// cast a page into an IndexPage struct
 IndexPage* load_index(RawPage* page) {
 	return (IndexPage* )page->page;
 }
@@ -126,12 +128,16 @@ int next_page_num(PageManager* pm) {
 	IndexPage* index = load_index(raw_index);
 	if(raw_index->empty) {
 		index->page_num = 0;
+		index->tree_root.page_type = TREEPAGE_HEADER;
+		index->tree_root.page_num = -1;
+		index->tree_root.node_offset = -1;
 	}
 	int next = index->page_num;
 	unload_page(raw_index);
 	return next;
 }
 
+// Increment the next free page number in the index page
 void increment_page_num(PageManager* pm) {
 	RawPage* raw_index = load_page(pm->index_path, sysconf(_SC_PAGE_SIZE));
 	IndexPage* index = load_index(raw_index);
@@ -161,7 +167,7 @@ char* new_page_file_string(PageManager* pm, int num) {
  */
 
 
-/* Create a new page manager based out of the gien root path */
+/* Create a new page manager based out of the given root path */
 PageManager* new_page_manager(char* root_path) {
 	PageManager* pm = malloc(sizeof(PageManager));
 	memset(pm, 0, sizeof(PageManager));
@@ -193,6 +199,9 @@ void delete_page_manager(PageManager* pm) {
 	free(pm);
 }
 
+// Acquire the page pointed to by the given PageRef.
+// this function handles caching and loading pages from disk
+// eventually this will handle locking semantics
 RawPage* acquire_ref(PageManager* pm, PageRef* ref) {
 	if(pm->cached_pages == NULL) {
 		RawPage* new_page = load_page(new_page_file_string(pm, ref->page_num), ref->page_num);
@@ -229,7 +238,30 @@ RawPage* acquire_ref(PageManager* pm, PageRef* ref) {
 
 }
 
+// save the reference to the root node into the index file
+void save_tree_root(PageManager* pm, PageRef* ref) {
+	RawPage* raw_index = load_page(pm->index_path, sysconf(_SC_PAGE_SIZE));
+	IndexPage* index = load_index(raw_index);
+	memcpy(&index->tree_root, ref, sizeof(PageRef));
+	unload_page(raw_index);
+}
+
+// load the reference to the root node from the index file
+PageRef* load_tree_root(PageManager* pm) {
+	RawPage* raw_index = load_page(pm->index_path, sysconf(_SC_PAGE_SIZE));
+	IndexPage* index = load_index(raw_index);
+	PageRef* root_ref = malloc(sizeof(PageRef));
+	memcpy(root_ref, &index->tree_root, sizeof(PageRef));
+	return root_ref;
+}
+
 void release_ref(PageManager* pm, PageRef* ref) {
 	// This function will do more once locking is added in.
 	return;
 }
+/*
+ * I need to search for the root node when I first make a database
+ * to do this I need to go find the first tree page and then find the loc of the first
+ * node in that tree page
+ * Maybe I should put it in the index.dat file
+ */

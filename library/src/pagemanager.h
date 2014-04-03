@@ -1,6 +1,9 @@
 #ifndef _SKV_PAGEMANAGER_H_
 #define _SKV_PAGEMANAGER_H_
 
+#define TREEPAGE_HEADER 0xDE110
+#define DATAPAGE_HEADER 0xDE111
+
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -48,6 +51,7 @@ typedef struct {
 //Index struct with information on the state of both data and tree pages
 typedef struct {
     int page_num; // number of pages
+    PageRef tree_root; // we store a ref to the root tree node
 } IndexPage;
 
 // constructor/destructor
@@ -74,4 +78,8 @@ char* new_page_file_string(PageManager* pm, int num);
 // Eventually lock semantics and caching will be added to this part
 RawPage* acquire_ref(PageManager* pm, PageRef* ref);
 void release_ref(PageManager* pm, PageRef* ref);
+
+
+void save_tree_root(PageManager* pm, PageRef* ref);
+PageRef* load_tree_root(PageManager* pm);
 #endif
